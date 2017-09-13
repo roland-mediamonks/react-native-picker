@@ -12,7 +12,7 @@
 @implementation BzwPicker
 
 -(instancetype)initWithFrame:(CGRect)frame dic:(NSDictionary *)dic leftStr:(NSString *)leftStr centerStr:(NSString *)centerStr rightStr:(NSString *)rightStr topbgColor:(NSArray *)topbgColor bottombgColor:(NSArray *)bottombgColor leftbtnbgColor:(NSArray *)leftbtnbgColor rightbtnbgColor:(NSArray *)rightbtnbgColor centerbtnColor:(NSArray *)centerbtnColor selectValueArry:(NSArray *)selectValueArry  weightArry:(NSArray *)weightArry
-       pickerToolBarFontSize:(NSString *)pickerToolBarFontSize  pickerFontSize:(NSString *)pickerFontSize  pickerFontColor:(NSArray *)pickerFontColor
+       pickerToolBarFontSize:(NSString *)pickerToolBarFontSize pickerToolBarFont:(NSString *)pickerToolBarFont  pickerFontSize:(NSString *)pickerFontSize  pickerFontColor:(NSArray *)pickerFontColor
 
 {
     self = [super initWithFrame:frame];
@@ -28,6 +28,7 @@
         self.rightStr=rightStr;
         self.centStr=centerStr;
         self.pickerToolBarFontSize=pickerToolBarFontSize;
+        self.pickerToolBarFont=pickerToolBarFont;
         self.pickerFontSize=pickerFontSize;
         self.pickerFontColor=pickerFontColor;
         [self getStyle];
@@ -49,10 +50,9 @@
     self.leftBtn = [UIButton buttonWithType:UIButtonTypeCustom];
     self.leftBtn.frame = CGRectMake(10, 5, 90, 30);
     [self.leftBtn setTitle:self.leftStr forState:UIControlStateNormal];
-    [self.leftBtn setFont:[UIFont systemFontOfSize:[_pickerToolBarFontSize integerValue]]];
+    [self.leftBtn setFont:[UIFont fontWithName:self.pickerToolBarFont size:[self.pickerToolBarFontSize integerValue]]];
     self.leftBtn.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
     [self.leftBtn addTarget:self action:@selector(cancleAction) forControlEvents:UIControlEventTouchUpInside];
-    
     [self.leftBtn setTitleColor:[self colorWith:leftbtnbgColor] forState:UIControlStateNormal];
     
     [view addSubview:self.leftBtn];
@@ -67,8 +67,10 @@
     [self.rightBtn setTitleColor:[self colorWith:rightbtnbgColor] forState:UIControlStateNormal];
     
     [view addSubview:self.rightBtn];
-    [self.rightBtn setFont:[UIFont systemFontOfSize:[_pickerToolBarFontSize integerValue]]];
-    [self.rightBtn addTarget:self action:@selector(cfirmAction) forControlEvents:UIControlEventTouchUpInside];  
+    [self.rightBtn setFont:[UIFont fontWithName:self.pickerToolBarFont size:[self.pickerToolBarFontSize integerValue]]];
+
+//    [self.rightBtn setFont:[UIFont systemFontOfSize:[_pickerToolBarFontSize integerValue]]];
+    [self.rightBtn addTarget:self action:@selector(cfirmAction) forControlEvents:UIControlEventTouchUpInside];
     
     UILabel *cenLabel=[[UILabel alloc]initWithFrame:CGRectMake(90, 5, SCREEN_WIDTH-180, 30)];
     

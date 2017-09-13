@@ -20,34 +20,35 @@ typedef void(^backBolock)(NSDictionary * );
 
 @property(nonatomic,copy)backBolock bolock;
 
-@property (strong, nonatomic) NSDictionary *pickerDic;//一开始进来的字典
+@property (strong, nonatomic) NSDictionary *pickerDic;
 
-@property(strong,nonatomic)NSArray *dataDry;//一进来的就没有数组和字典的区别肯定是一个字典
+@property(strong,nonatomic)NSArray *dataDry;
 
-@property (strong, nonatomic) NSMutableArray *provinceArray;//省、市
-@property (strong, nonatomic) NSMutableArray *cityArray;//市，县
-@property (strong, nonatomic) NSArray *townArray;//县，区
+@property (strong, nonatomic) NSMutableArray *provinceArray;
+@property (strong, nonatomic) NSMutableArray *cityArray;
+@property (strong, nonatomic) NSArray *townArray;
 
 
 @property(strong,nonatomic)NSArray *selectthreeAry;
 
-@property (strong,nonatomic)NSArray *selectArry;//2级联动时候用的
+@property (strong,nonatomic)NSArray *selectArry;
 
-@property (strong,nonatomic)UIButton *leftBtn;//取消
+@property (strong,nonatomic)UIButton *leftBtn;
 @property (strong,nonatomic)UIButton *rightBtn;
 
 @property(strong,nonatomic)NSString *leftStr;
 @property(strong,nonatomic)NSString *centStr;
-@property(strong,nonatomic)NSString *rightStr;
+@property(strong,nonatomic)NSString *rightStr;;
 @property(strong,nonatomic)NSString *pickerToolBarFontSize;
+@property(strong,nonatomic)NSString *pickerToolBarFont;
 @property(strong,nonatomic)NSString *pickerFontSize;
 @property(strong,nonatomic)NSArray*pickerFontColor;
 
 
 
-@property(assign,nonatomic)BOOL Correlation;//判断有没有没有关联
+@property(assign,nonatomic)BOOL Correlation;
 
-@property(nonatomic,strong)NSString *numberCorrela;//关联是2行 还是3行
+@property(nonatomic,strong)NSString *numberCorrela;
 
 @property(nonatomic,strong)NSArray *noCorreArry;
 
@@ -77,8 +78,22 @@ typedef void(^backBolock)(NSDictionary * );
 
 
 
--(instancetype)initWithFrame:(CGRect)frame dic:(NSDictionary *)dic leftStr:(NSString *)leftStr centerStr:(NSString *)centerStr rightStr:(NSString *)rightStr topbgColor:(NSArray *)topbgColor bottombgColor:(NSArray *)bottombgColor leftbtnbgColor:(NSArray *)leftbtnbgColor rightbtnbgColor:(NSArray *)rightbtnbgColor centerbtnColor:(NSArray *)centerbtnColor selectValueArry:(NSArray *)selectValueArry  weightArry:(NSArray *)weightArry
-       pickerToolBarFontSize:(NSString *)pickerToolBarFontSize  pickerFontSize:(NSString *)pickerFontSize  pickerFontColor:(NSArray *)pickerFontColor;
+-(instancetype)initWithFrame:(CGRect)frame
+    dic:(NSDictionary *)dic
+    leftStr:(NSString *)leftStr
+    centerStr:(NSString *)centerStr
+    rightStr:(NSString *)rightStr
+    topbgColor:(NSArray *)topbgColor
+    bottombgColor:(NSArray *)bottombgColor
+    leftbtnbgColor:(NSArray *)leftbtnbgColor
+    rightbtnbgColor:(NSArray *)rightbtnbgColor
+    centerbtnColor:(NSArray *)centerbtnColor
+    selectValueArry:(NSArray *)selectValueArry
+    weightArry:(NSArray *)weightArry
+    pickerToolBarFontSize:(NSString *)pickerToolBarFontSize
+    pickerToolBarFont:(NSString *)pickerToolBarFont
+    pickerFontSize:(NSString *)pickerFontSize
+    pickerFontColor:(NSArray *)pickerFontColor;
 
 -(void)selectRow;
 @end

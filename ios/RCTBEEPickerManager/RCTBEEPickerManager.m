@@ -10,11 +10,12 @@
 #import "BzwPicker.h"
 #import "RCTEventDispatcher.h"
 
-@interface RCTBEEPickerManager()
+@interface RCTBEEPickerManager ()
 
-@property(nonatomic,strong)BzwPicker *pick;
-@property(nonatomic,assign)float height;
-@property(nonatomic,weak)UIWindow * window;
+@property(nonatomic, strong) BzwPicker *pick;
+@property(nonatomic, strong) UIView *backgroundView;
+@property(nonatomic, assign) float height;
+@property(nonatomic, weak) UIWindow *window;
 
 @end
 
@@ -24,126 +25,154 @@
 
 RCT_EXPORT_MODULE();
 
-RCT_EXPORT_METHOD(_init:(NSDictionary *)indic){
-    
+RCT_EXPORT_METHOD(_init:
+    (NSDictionary *) indic) {
+
     dispatch_async(dispatch_get_main_queue(), ^{
         [[UIApplication sharedApplication].keyWindow endEditing:YES];
     });
-    
+
     self.window = [UIApplication sharedApplication].keyWindow;
-    
-    NSString *pickerConfirmBtnText=indic[@"pickerConfirmBtnText"];
-    NSString *pickerCancelBtnText=indic[@"pickerCancelBtnText"];
-    NSString *pickerTitleText=indic[@"pickerTitleText"];
-    NSArray *pickerConfirmBtnColor=indic[@"pickerConfirmBtnColor"];
-    NSArray *pickerCancelBtnColor=indic[@"pickerCancelBtnColor"];
-    NSArray *pickerTitleColor=indic[@"pickerTitleColor"];
-    NSArray *pickerToolBarBg=indic[@"pickerToolBarBg"];
-    NSArray *pickerBg=indic[@"pickerBg"];
-    NSArray *selectArry=indic[@"selectedValue"];
-    NSArray *weightArry=indic[@"wheelFlex"];
-    NSString *pickerToolBarFontSize=[NSString stringWithFormat:@"%@",indic[@"pickerToolBarFontSize"]];
-    NSString *pickerFontSize=[NSString stringWithFormat:@"%@",indic[@"pickerFontSize"]];
-    NSArray *pickerFontColor=indic[@"pickerFontColor"];
-    
-    id pickerData=indic[@"pickerData"];
-    
-    NSMutableDictionary *dataDic=[[NSMutableDictionary alloc]init];
-    
-    dataDic[@"pickerData"]=pickerData;
-    
-    [self.window.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        
+
+    NSString *pickerConfirmBtnText = indic[@"pickerConfirmBtnText"];
+    NSString *pickerCancelBtnText = indic[@"pickerCancelBtnText"];
+    NSString *pickerTitleText = indic[@"pickerTitleText"];
+    NSArray *pickerConfirmBtnColor = indic[@"pickerConfirmBtnColor"];
+    NSArray *pickerCancelBtnColor = indic[@"pickerCancelBtnColor"];
+    NSArray *pickerTitleColor = indic[@"pickerTitleColor"];
+    NSArray *pickerToolBarBg = indic[@"pickerToolBarBg"];
+    NSArray *pickerBg = indic[@"pickerBg"];
+    NSArray *selectArry = indic[@"selectedValue"];
+    NSArray *weightArry = indic[@"wheelFlex"];
+    NSString *pickerToolBarFont = indic[@"pickerBtnFont"];
+    NSString *pickerToolBarFontSize = [NSString stringWithFormat:@"%@", indic[@"pickerToolBarFontSize"]];
+    NSString *pickerFontSize = [NSString stringWithFormat:@"%@", indic[@"pickerFontSize"]];
+    NSArray *pickerFontColor = indic[@"pickerFontColor"];
+
+    id pickerData = indic[@"pickerData"];
+
+    NSMutableDictionary *dataDic = [[NSMutableDictionary alloc] init];
+
+    dataDic[@"pickerData"] = pickerData;
+
+    [self.window.subviews enumerateObjectsUsingBlock:^(__kindof UIView *_Nonnull obj, NSUInteger idx, BOOL *_Nonnull stop) {
+
         if ([obj isKindOfClass:[BzwPicker class]]) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                
+
                 [obj removeFromSuperview];
             });
         }
-        
+
     }];
-    
-    if ([[UIDevice currentDevice].systemVersion doubleValue] >= 9.0 ) {
-        self.height=250;
-    }else{
-        self.height=220;
+
+    if ([[UIDevice currentDevice].systemVersion doubleValue] >= 9.0) {
+        self.height = 250;
+    } else {
+        self.height = 220;
     }
-    
-    self.pick=[[BzwPicker alloc]initWithFrame:CGRectMake(0, SCREEN_HEIGHT, SCREEN_WIDTH, self.height) dic:dataDic leftStr:pickerCancelBtnText centerStr:pickerTitleText rightStr:pickerConfirmBtnText topbgColor:pickerToolBarBg bottombgColor:pickerBg leftbtnbgColor:pickerCancelBtnColor rightbtnbgColor:pickerConfirmBtnColor centerbtnColor:pickerTitleColor selectValueArry:selectArry weightArry:weightArry pickerToolBarFontSize:pickerToolBarFontSize pickerFontSize:pickerFontSize pickerFontColor:pickerFontColor];
-    
-    
-    _pick.bolock=^(NSDictionary *backinfoArry){
-        
+
+    self.pick = [[BzwPicker alloc] initWithFrame:CGRectMake(0, SCREEN_HEIGHT, SCREEN_WIDTH, self.height) dic:dataDic leftStr:pickerCancelBtnText centerStr:pickerTitleText rightStr:pickerConfirmBtnText topbgColor:pickerToolBarBg bottombgColor:pickerBg leftbtnbgColor:pickerCancelBtnColor rightbtnbgColor:pickerConfirmBtnColor centerbtnColor:pickerTitleColor selectValueArry:selectArry weightArry:weightArry pickerToolBarFontSize:pickerToolBarFontSize pickerToolBarFont:pickerToolBarFont pickerFontSize:pickerFontSize pickerFontColor:pickerFontColor];
+    self.backgroundView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, SCREEN_HEIGHT, SCREEN_WIDTH)];
+    [self.backgroundView setBackgroundColor:[UIColor clearColor]];
+
+    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(viewTouched)];
+    [tap setNumberOfTapsRequired:1];
+    [self.window addGestureRecognizer:tap];
+
+
+    _pick.bolock = ^(NSDictionary *backinfoArry) {
+
         dispatch_async(dispatch_get_main_queue(), ^{
-            
+
             [self.bridge.eventDispatcher sendAppEventWithName:@"pickerEvent" body:backinfoArry];
         });
     };
-    
+
     dispatch_async(dispatch_get_main_queue(), ^{
-        
-        [self.window addSubview:_pick];
-        
+
+        [self.window addSubview:self.backgroundView];
+        [self.backgroundView addSubview:_pick];
+
         [UIView animateWithDuration:.3 animations:^{
-            
-            [_pick setFrame:CGRectMake(0, SCREEN_HEIGHT-self.height, SCREEN_WIDTH, self.height)];
-            
+
+            [_pick setFrame:CGRectMake(0, SCREEN_HEIGHT - self.height, SCREEN_WIDTH, self.height)];
+
         }];
-        
+
     });
-    
+
 }
 
-RCT_EXPORT_METHOD(show){
+RCT_EXPORT_METHOD(viewTouched) {
     if (self.pick) {
-        
+
         dispatch_async(dispatch_get_main_queue(), ^{
             [UIView animateWithDuration:.3 animations:^{
-                
-                [_pick setFrame:CGRectMake(0, SCREEN_HEIGHT-self.height, SCREEN_WIDTH, self.height)];
-                
+                [self.backgroundView removeFromSuperview];
+                [_pick setFrame:CGRectMake(0, SCREEN_HEIGHT, SCREEN_WIDTH, self.height)];
             }];
         });
-    }return;
+    }
+
 }
 
-RCT_EXPORT_METHOD(hide){
-    
+
+RCT_EXPORT_METHOD(show) {
+    if (self.pick) {
+
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [UIView animateWithDuration:.3 animations:^{
+
+                [_pick setFrame:CGRectMake(0, SCREEN_HEIGHT - self.height, SCREEN_WIDTH, self.height)];
+
+            }];
+        });
+    }
+    return;
+}
+
+RCT_EXPORT_METHOD(hide) {
+
     if (self.pick) {
         dispatch_async(dispatch_get_main_queue(), ^{
             [UIView animateWithDuration:.3 animations:^{
                 [_pick setFrame:CGRectMake(0, SCREEN_HEIGHT, SCREEN_WIDTH, self.height)];
             }];
         });
-    }return;
+    }
+    return;
 }
 
-RCT_EXPORT_METHOD(select: (NSArray*)data){
+RCT_EXPORT_METHOD(select:
+    (NSArray *) data) {
 
     if (self.pick) {
         dispatch_async(dispatch_get_main_queue(), ^{
             _pick.selectValueArry = data;
             [_pick selectRow];
         });
-    }return;
+    }
+    return;
 }
 
-RCT_EXPORT_METHOD(isPickerShow:(RCTResponseSenderBlock)getBack){
-    
+RCT_EXPORT_METHOD(isPickerShow:
+    (RCTResponseSenderBlock) getBack) {
+
     if (self.pick) {
-        
-        CGFloat pickY=_pick.frame.origin.y;
-        
-        if (pickY==SCREEN_HEIGHT) {
-            
+
+        CGFloat pickY = _pick.frame.origin.y;
+
+        if (pickY == SCREEN_HEIGHT) {
+
             getBack(@[@YES]);
-        }else
-        {
+        } else {
             getBack(@[@NO]);
         }
-    }else{
+    } else {
         getBack(@[@"picker不存在"]);
     }
 }
+
 
 @end

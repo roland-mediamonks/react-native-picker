@@ -1,15 +1,24 @@
 package com.beefe.picker;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.DialogFragment;
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
+import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -66,7 +75,7 @@ import static android.graphics.Color.argb;
  * 3. Added pickerFontSize
  * 4. Used LifecycleEventListener replace Application.ActivityLifecycleCallbacks
  * 5. Fixed other bug
- *
+ * <p>
  * Edited by heng on 2017/01/17
  * 1. Added select(ReadableArray array, Callback callback)
  * 2. Optimization code
@@ -92,14 +101,22 @@ public class PickerViewModule extends ReactContextBaseJavaModule implements Life
     private static final String PICKER_CONFIRM_BTN_TEXT = "pickerConfirmBtnText";
     private static final String PICKER_CONFIRM_BTN_COLOR = "pickerConfirmBtnColor";
 
+    private static final String PICKER_BTN_DIVIDER_COLOR = "pickerBtnDividerColor";
+    private static final String PICKER_BTN_FONT = "pickerBtnFont";
+
     private static final String PICKER_CANCEL_BTN_TEXT = "pickerCancelBtnText";
     private static final String PICKER_CANCEL_BTN_COLOR = "pickerCancelBtnColor";
 
+    private static final String PICKER_TITLE_BG = "pickerTitleBg";
+    private static final String PICKER_TITLE_FONT = "pickerTitleFont";
+    private static final String PICKER_TITLE_HEIGHT = "pickerTitleHeight";
     private static final String PICKER_TITLE_TEXT = "pickerTitleText";
     private static final String PICKER_TITLE_TEXT_COLOR = "pickerTitleColor";
+    private static final String PICKER_TITLE_DIVIDER_COLOR = "pickerTitleDividerColor";
 
     private static final String PICKER_TEXT_COLOR = "pickerFontColor";
     private static final String PICKER_TEXT_SIZE = "pickerFontSize";
+    private static final String PICKER_TEXT_FONT = "pickerFont";
 
     private static final String PICKER_EVENT_NAME = "pickerEvent";
     private static final String EVENT_KEY_CONFIRM = "confirm";
@@ -108,7 +125,7 @@ public class PickerViewModule extends ReactContextBaseJavaModule implements Life
 
     private static final String ERROR_NOT_INIT = "please initialize the component first";
 
-    private Dialog dialog = null;
+    private AlertDialog dialog = null;
 
     private boolean isLoop = true;
 
@@ -130,6 +147,7 @@ public class PickerViewModule extends ReactContextBaseJavaModule implements Life
         reactContext.addLifecycleEventListener(this);
     }
 
+
     @Override
     public String getName() {
         return REACT_CLASS;
@@ -139,10 +157,15 @@ public class PickerViewModule extends ReactContextBaseJavaModule implements Life
     public void _init(ReadableMap options) {
         Activity activity = getCurrentActivity();
         if (activity != null && options.hasKey(PICKER_DATA)) {
+
+
             View view = activity.getLayoutInflater().inflate(R.layout.picker_view, null);
-            RelativeLayout barLayout = (RelativeLayout) view.findViewById(R.id.barLayout);
-            TextView cancelTV = (TextView) view.findViewById(R.id.cancel);
+            LinearLayout barLayout = (LinearLayout) view.findViewById(R.id.barLayout);
+            LinearLayout titleLayout = (LinearLayout) view.findViewById(R.id.titleLayout);
             TextView titleTV = (TextView) view.findViewById(R.id.title);
+            View titleDivider = view.findViewById(R.id.titleDivider);
+            View buttonDivider = view.findViewById(R.id.buttonDivider);
+            TextView cancelTV = (TextView) view.findViewById(R.id.cancel);
             TextView confirmTV = (TextView) view.findViewById(R.id.confirm);
             RelativeLayout pickerLayout = (RelativeLayout) view.findViewById(R.id.pickerLayout);
             pickerViewLinkage = (PickerViewLinkage) view.findViewById(R.id.pickerViewLinkage);
@@ -156,12 +179,45 @@ public class PickerViewModule extends ReactContextBaseJavaModule implements Life
                     barViewHeight = (int) options.getDouble(PICKER_TOOL_BAR_HEIGHT);
                 }
             } else {
-                barViewHeight = (int) (activity.getResources().getDisplayMetrics().density * 40);
+                barViewHeight = 40;
             }
-            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
-                    RelativeLayout.LayoutParams.MATCH_PARENT,
-                    barViewHeight);
-            barLayout.setLayoutParams(params);
+            LinearLayout.LayoutParams barViewParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    (int) (barViewHeight * activity.getResources().getDisplayMetrics().density));
+            barLayout.setLayoutParams(barViewParams);
+
+            int titleViewHeight;
+            if (options.hasKey(PICKER_TITLE_HEIGHT)) {
+                try {
+                    titleViewHeight = options.getInt(PICKER_TITLE_HEIGHT);
+                } catch (Exception e) {
+                    titleViewHeight = (int) options.getDouble(PICKER_TITLE_HEIGHT);
+                }
+            } else {
+                titleViewHeight = 40;
+            }
+            LinearLayout.LayoutParams titleViewParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    (int) (titleViewHeight * activity.getResources().getDisplayMetrics().density));
+            titleLayout.setLayoutParams(titleViewParams);
+
+            if (options.hasKey(PICKER_TITLE_BG)) {
+                ReadableArray array = options.getArray(PICKER_TITLE_BG);
+                int[] colors = getColor(array);
+                titleLayout.setBackgroundColor(argb(colors[3], colors[0], colors[1], colors[2]));
+            }
+            if (options.hasKey(PICKER_TITLE_FONT)) {
+                String font = options.getString(PICKER_TITLE_FONT);
+                Typeface titleFont = Typeface.createFromAsset(getReactApplicationContext().getAssets(),"fonts/" + font + ".ttf");
+                titleTV.setTypeface(titleFont);
+            }
+
+            if (options.hasKey(PICKER_BTN_FONT)) {
+                String font = options.getString(PICKER_BTN_FONT);
+                Typeface titleFont = Typeface.createFromAsset(getReactApplicationContext().getAssets(),"fonts/" + font + ".ttf");
+                cancelTV.setTypeface(titleFont);
+                confirmTV.setTypeface(titleFont);
+            }
 
             if (options.hasKey(PICKER_TOOL_BAR_BG)) {
                 ReadableArray array = options.getArray(PICKER_TOOL_BAR_BG);
@@ -186,6 +242,19 @@ public class PickerViewModule extends ReactContextBaseJavaModule implements Life
                 int[] colors = getColor(array);
                 confirmTV.setTextColor(argb(colors[3], colors[0], colors[1], colors[2]));
             }
+
+            if (options.hasKey(PICKER_BTN_DIVIDER_COLOR)) {
+                ReadableArray array = options.getArray(PICKER_BTN_DIVIDER_COLOR);
+                int[] colors = getColor(array);
+                buttonDivider.setBackgroundColor(argb(colors[3], colors[0], colors[1], colors[2]));
+            }
+
+            if (options.hasKey(PICKER_TITLE_DIVIDER_COLOR)) {
+                ReadableArray array = options.getArray(PICKER_TITLE_DIVIDER_COLOR);
+                int[] colors = getColor(array);
+                titleDivider.setBackgroundColor(argb(colors[3], colors[0], colors[1], colors[2]));
+            }
+
             confirmTV.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -340,30 +409,33 @@ public class PickerViewModule extends ReactContextBaseJavaModule implements Life
                 ReadableArray array = options.getArray(PICKER_BG_COLOR);
                 int[] colors = getColor(array);
                 pickerLayout.setBackgroundColor(argb(colors[3], colors[0], colors[1], colors[2]));
+                titleLayout.setBackgroundColor(argb(colors[3], colors[0], colors[1], colors[2]));
             }
 
-            int height = barViewHeight + pickerViewHeight;
             if (dialog == null) {
-                dialog = new Dialog(activity, R.style.Dialog_Full_Screen);
-                dialog.setContentView(view);
+                AlertDialog.Builder builder = new AlertDialog.Builder(activity, R.style.Dialog_Full_Screen);
+                builder.setView(view);
+                dialog = builder.create();
+
                 WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
                 Window window = dialog.getWindow();
                 if (window != null) {
                     layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-                    layoutParams.type = WindowManager.LayoutParams.TYPE_TOAST;
+//                    layoutParams.type = WindowManager.LayoutParams.TYPE_TOAST;
                     layoutParams.format = PixelFormat.TRANSPARENT;
                     layoutParams.windowAnimations = R.style.PickerAnim;
                     layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
-                    layoutParams.height = height;
-                    layoutParams.gravity = Gravity.BOTTOM;
+                    layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
+                    layoutParams.gravity = Gravity.CENTER_VERTICAL;
                     window.setAttributes(layoutParams);
                 }
             } else {
                 dialog.dismiss();
-                dialog.setContentView(view);
+//                dialog.setView(view);
             }
         }
     }
+
 
     @ReactMethod
     public void select(ReadableArray array, Callback callback) {
@@ -383,6 +455,7 @@ public class PickerViewModule extends ReactContextBaseJavaModule implements Life
             return;
         }
         if (!dialog.isShowing()) {
+            dialog.getWindow().getAttributes().windowAnimations = R.style.PickerAnim;
             dialog.show();
         }
     }
