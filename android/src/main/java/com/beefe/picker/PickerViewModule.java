@@ -22,6 +22,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.beefe.picker.util.MIUIUtils;
 import com.beefe.picker.view.OnSelectedListener;
 import com.beefe.picker.view.PickerViewAlone;
 import com.beefe.picker.view.PickerViewLinkage;
@@ -420,6 +421,11 @@ public class PickerViewModule extends ReactContextBaseJavaModule implements Life
                 WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
                 Window window = dialog.getWindow();
                 if (window != null) {
+                    if (MIUIUtils.isMIUI()) {
+                        layoutParams.type = WindowManager.LayoutParams.TYPE_APPLICATION;
+                    }else {
+                        //layoutParams.type = WindowManager.LayoutParams.TYPE_TOAST;
+                    }
                     layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 //                    layoutParams.type = WindowManager.LayoutParams.TYPE_TOAST;
                     layoutParams.format = PixelFormat.TRANSPARENT;
